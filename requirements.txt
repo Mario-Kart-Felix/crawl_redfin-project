@@ -1,3 +1,4 @@
 chardet
 requests
 beautifulsoup4>=4.5.3
+autocompvar==0.0.2
