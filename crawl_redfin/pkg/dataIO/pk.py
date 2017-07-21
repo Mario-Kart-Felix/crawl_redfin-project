@@ -18,28 +18,23 @@ useful method:
 from __future__ import print_function, unicode_literals
 
 import time
-import os, shutil
+import os
+import shutil
 import sys
 import gzip
 import base64
 import pickle
 
 try:
+    from . import compress
+    from . import textfile
+    from . import py23
     from .printer import prt
 except:
-    from dataIO.printer import prt
-try:
-    from . import compress
-except:
     from dataIO import compress
-try:
-    from . import textfile
-except:
     from dataIO import textfile
-try:
-    from . import py23
-except:
     from dataIO import py23
+    from dataIO.printer import prt
 
 
 class PickleExtError(Exception):
@@ -48,7 +43,7 @@ class PickleExtError(Exception):
 
 def is_pickle_file(abspath):
     """Parse file extension.
-    
+
     - *.pickle: uncompressed, utf-8 encode pickle file
     - *.gz: compressed, utf-8 encode pickle file
     """
@@ -63,7 +58,7 @@ def is_pickle_file(abspath):
     else:
         raise PickleExtError(
             "'%s' is not a valid pickle file. "
-            "extension has to be '.pickle' for uncompressed, '.gz' " 
+            "extension has to be '.pickle' for uncompressed, '.gz' "
             "for compressed." % abspath)
     return is_pickle
 
@@ -75,7 +70,7 @@ def lower_ext(abspath):
     return fname + ext.lower()
 
 
-def load(abspath, default=dict(), enable_verbose=True):
+def load(abspath, default=None, enable_verbose=True):
     """Load Pickle from file. If file are not exists, returns ``default``.
 
     :param abspath: file path. use absolute path as much as you can. 
@@ -109,13 +104,17 @@ def load(abspath, default=dict(), enable_verbose=True):
     :param enable_verbose: 默认 ``True``, 信息提示的开关, 批处理时建议关闭
     :type enable_verbose: ``布尔值``
     """
+    if default is None:
+        default = dict()
+
     prt("\nLoad from '%s' ..." % abspath, enable_verbose)
-    
+
     abspath = lower_ext(str(abspath))
     is_pickle = is_pickle_file(abspath)
-        
+
     if not os.path.exists(abspath):
-        prt("    File not found, use default value: %r" % default, enable_verbose)
+        prt("    File not found, use default value: %r" % default,
+            enable_verbose)
         return default
 
     st = time.clock()
@@ -123,12 +122,12 @@ def load(abspath, default=dict(), enable_verbose=True):
         data = pickle.loads(textfile.readbytes(abspath))
     else:
         data = pickle.loads(compress.read_gzip(abspath))
-        
+
     prt("    Complete! Elapse %.6f sec." % (time.clock() - st), enable_verbose)
     return data
 
 
-def dump(data, abspath, pk_protocol=py23.pk_protocol, 
+def dump(data, abspath, pk_protocol=py23.pk_protocol,
          overwrite=False, enable_verbose=True):
     """Dump picklable object to file.
     Provides multiple choice to customize the behavior.
@@ -186,14 +185,14 @@ def dump(data, abspath, pk_protocol=py23.pk_protocol,
     :type enable_verbose: ``布尔值``
     """
     prt("\nDump to '%s' ..." % abspath, enable_verbose)
-    
+
     abspath = lower_ext(str(abspath))
     is_pickle = is_pickle_file(abspath)
-    
+
     if os.path.exists(abspath):
-        if not overwrite: # 存在, 并且overwrite=False
+        if not overwrite:  # 存在, 并且overwrite=False
             prt("    Stop! File exists and overwrite is not allowed",
-                 enable_verbose)
+                enable_verbose)
             return
 
     st = time.clock()
@@ -202,20 +201,20 @@ def dump(data, abspath, pk_protocol=py23.pk_protocol,
         textfile.writebytes(content, abspath)
     else:
         compress.write_gzip(content, abspath)
-    
+
     prt("    Complete! Elapse %.6f sec." % (time.clock() - st), enable_verbose)
 
 
 def safe_dump(data, abspath, pk_protocol=py23.pk_protocol, enable_verbose=True):
     """A stable version of :func:`dump`, this method will silently overwrite 
     existing file.
-    
+
     There's a issue with :func:`dump`: If your program is interrupted while 
     writing, you got an incomplete file, and you also lose the original file.
     So this method write pickle to a temporary file first, then rename to what
     you expect, and silently overwrite old one. This way can guarantee atomic 
     write.
-    
+
     **中文文档**
 
     在对文件进行写入时, 如果程序中断, 则会留下一个不完整的文件。如果使用了覆盖式
@@ -226,7 +225,7 @@ def safe_dump(data, abspath, pk_protocol=py23.pk_protocol, enable_verbose=True):
     """
     abspath = lower_ext(str(abspath))
     abspath_temp = "%s.tmp" % abspath
-    dump(data, abspath_temp, 
+    dump(data, abspath_temp,
          pk_protocol=pk_protocol, enable_verbose=enable_verbose)
     shutil.move(abspath_temp, abspath)
 

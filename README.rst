@@ -8,12 +8,12 @@
 
 
 Welcome to crawl_redfin Documentation
-===============================================================================
-This is just a example project for demonstration purpose.
+=====================================
+Redfin Crawler Tool Set.
 
 
 **Quick Links**
--------------------------------------------------------------------------------
+---------------
 - `GitHub Homepage <https://github.com/MacHu-GWU/crawl_redfin-project>`_
 - `Online Documentation <http://pythonhosted.org/crawl_redfin>`_
 - `PyPI download <https://pypi.python.org/pypi/crawl_redfin>`_
@@ -25,7 +25,7 @@ This is just a example project for demonstration purpose.
 .. _install:
 
 Install
--------------------------------------------------------------------------------
+-------
 
 ``crawl_redfin`` is released on PyPI, so all you need is:
 

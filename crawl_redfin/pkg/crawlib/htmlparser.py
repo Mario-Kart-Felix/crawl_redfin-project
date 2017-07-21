@@ -79,6 +79,7 @@ class BaseHtmlParser(object):
             data = None
         return data
 
+
 if __name__ == "__main__":
     def test_htmlparser():
         htmlparser = BaseHtmlParser()

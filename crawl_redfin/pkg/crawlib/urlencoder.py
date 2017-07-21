@@ -13,11 +13,11 @@ class BaseUrlEncoder(object):
     """Base Url Encoder. Provide functional interface to create url.
     """
     domain = None
-    
+
     def __init__(self):
         result = urlparse(self.domain)
-        self.domain = "%s://%s" % (result.scheme, result.netloc)        
-    
+        self.domain = "%s://%s" % (result.scheme, result.netloc)
+
     def url_join(self, *parts):
         return url_join(self.domain, *parts)
 

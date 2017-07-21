@@ -78,13 +78,18 @@ class Spider(object):
         binary = response.content
         return binary
 
-    def get_html(self, url, headers=None, timeout=None, encoding=None, errors="strict"):
+    def get_html(self, url,
+                 headers=None,
+                 timeout=None,
+                 encoding=None,
+                 errors="strict"):
         """Get html source in text.
 
         :param url: url you want to crawl
+        :param headers: request headers
         :param timeout: time out time in second
         :param encoding: if not given, the encoding will be auto-detected
-        :param strict: options "ignore", "strict"; encoding error parameter
+        :param errors: options "ignore", "strict"; encoding error parameter
         """
         binary = self.get_binary(url, headers=headers, timeout=timeout)
         if encoding is None:
@@ -135,6 +140,7 @@ class Spider(object):
             except:
                 pass
             raise NotDownloadError(url)
+
 
 spider = Spider()
 
