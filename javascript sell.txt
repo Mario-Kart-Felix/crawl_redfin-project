@@ -1,0 +1,586 @@
+Decorators are just a wrapper around a function. They are used to enhance the functionality of the function without modifying the underlying function. Decorators are not a new concept — they have already been used by developers of Python and C#, and even JavaScript developers have been implementing them since forever. What? Yes, you heard it right.
+
+
+
+JavaScript developers are familiar with higher-order functions, which behave just like decorators. To understand higher-order functions in JavaScript, let’s have a detailed overview of functions in JavaScript.
+
+Functions in JavaScript
+Functions in JavaScript are first-class objects, that is they behave just like objects. We can assign them to variables, pass them as parameters to other functions. They can also be returned by another function. Let’s consider some examples to understand all these concepts.
+
+Functions Assigned to a Variable
+// Function assigned to a variable
+var helloWorldFunc = function() {
+	console.log("Hello, world")
+}
+
+// helloWorldFunc assigned to another variable. Now both anotherVar and helloWorldFunc 
+// are pointing to the same function
+var anotherVar = helloWorldFunc
+
+// As both are pointing to same function, output for both will be same
+helloWorldFunc() // Output: Hello, world
+anotherVar()    // Output: Hello, world
+JavaScript
+Here, helloWorldFunc is pointing to a function definition that prints Hello, world. When helloWorldFunc is assigned to anotherVar, both variables start pointing to the same function definition. Hence, when both the functions are called, they print the same output — Hello, world.
+
+Functions Passed as a Parameter to Another Function
+// Function assigned to a variable
+var printHello = function() {
+	console.log("I am printHello function")
+}
+
+// printHelloAndHi takes function as a parameter and calls the passed function 
+// inside its definition
+function printHelloAndHi(func) {
+	func()
+	console.log("I am printHelloAndHi function")
+}
+
+// printHelloAndHi function passes printHello as a paramerter
+printHelloAndHi(printHello)
+/*
+ I am printHello function
+ I am printHelloAndHi function
+*/
+JavaScript
+Here, we have passed printHello function as a parameter to the printHelloAndHi function, so printHelllo function gets assigned to func variable. printHelloAndHi function calls func (i.e. printHello function) inside its definition.
+
+Function Returned by Another Function
+function printAdditionFunc(x, y) {
+	var addNumbers = function () {
+		result = x + y;
+		console.log("Addition of " + x + " and " + y + " is: " + result);
+	}
+    
+	// Returns a function
+	return addNumbers
+}
+
+// printAdditionFunc returns the function addNumbers which gets assigned to addNumbersFunc
+var addNumbersFunc = printAdditionFunc(3, 4)
+// This is a function
+console.log(addNumbersFunc)
+
+addNumbersFunc() 
+JavaScript
+returnFunc
+
+Here, printAdditionFunc function takes two parameters x and y. It returns addNumbers function definition which gets assigned to addNumbersFunc. When addNumbersFunc is called, it returns the addition of 3 and 4. How are 3 and 4, which were passed to printAdditionFunc, accessible inside addNumbersFunc? This is due to Closures in JavaScript. Closures let child functions access parent function variables, objects, etc. In other words, child functions store parent function variables so that child functions can used them whenever required.
+
+
+
+In the above function, we can check that addNumbersFunc stores the values of 3 and 4. How JavaScript stores these variables can be understood from this article.
+
+Now that the basics of functions are clear, let’s understand higher-order functions.
+
+Higher-Order Functions in JavaScript
+Higher-order functions are functions in JavaScript that take another function as a parameter, add some operations on top of them and return the function. Functions printAdditionFunc and printAddition mentioned in the above examples are both higher-order functions. Let’s consider some examples of higher-order functions.
+
+function printMessage(message) {
+	return function() {
+		console.log(message)
+	}
+}
+
+// printHello is a function
+var printHello = printMessage("Hello") // returns a function
+printHello() // Output: Hello
+
+// printHi is a function
+var printHi = printMessage("Hi") // return a function
+printHi() // Output: Hi
+JavaScript
+Here, printMessage is a higher-order function. It is like a factory function which returns a new function.
+
+Another More Useful Example
+// handleException is a higher-order function which takes a function as a parameter 
+// and adds exception handling features to the existing functions. 
+function handleException(funcAsParameter) {
+	console.log("Inside handleException function")
+	try {
+		funcAsParameter()
+	} catch(err) {
+		console.log(err)
+	}
+}
+
+function divideByZero() {
+	result = 5 / 0
+	if(!Number.isFinite(result)) {
+		throw "Division by Zero not a good idea!!"
+	}
+	console.log("Result of division of 5 by zero is: " + result)
+}
+
+// Passing divideByZero as a parameter to handleException. handleException will 
+// call the divideByZero method and will handle any exception raised by it. 
+handleException(divideByZero)
+JavaScript
+handleException
+
+Here,the  handleException function is a higher-order function. It can be used by any function to handle the exception. With handleException function we do not have to handle exceptions for each function separately, we can just pass each function to the handleException function and they will get the functionality to handle exceptions from the handleException function. When we pass divideByZero as a parameter to the handleException function, the exception raised by divideByZero is handled by handleException function code.
+
+If you look closely at the definition of higher-order functions and decorators, you will find that they are similar. Higher-order functions behave just like decorators. Just like higher-order functions, decorators also add some functionality to the existing function without modifying the underlying code. In our case, handleException is a decorator function.
+
+Then, Why Decorators?
+If we already have a decorator as a higher-order function, then why do we need decorators? Higher-order functions can serve as decorators to the JavaScript function, but the invention of classes in JavaScript introduced us to class methods — that is, functions defined inside class, where higher-order functions failed to act as decorators. To understand why a class method could not be used with higher-order functions, let’s first understand: what are classes in JavaScript.
+
+Classes in JavaScript
+Before the Class Keyword
+Before the class keyword was introduced by ES2015, if we wanted to create classes, i.e. blueprint for objects, in JavaScript we took the help of prototypes and the constructor function.
+
+Consider an example of the constructor function:
+
+// This is the constructor function
+function Human(firstName, lastName) {
+	this.firstName = firstName
+	this.lastName = lastName
+}
+
+// getFullName function will be shared by all the objects created from Human function
+Human.prototype.getFullName = function() {
+	return this.firstName + " " + this.lastName
+}
+
+var person1 = new Human("Virat", "Kohli")
+var person2 = new Human("Rohit", "Sharma")
+
+console.log(person1)
+JavaScript
+The Human function is a constructor function with properties firstName and lastName. With the help of this Human function, we can create new objects. These objects will have firstName, lastName and getFullName as their properties.
+
+Each constructor function has a prototype property, which is an object. Properties added to the prototype will be shared among all the objects created from the constructor function. Prototype properties can be checked as follows:
+
+Human.prototype
+JavaScript
+Prototypes properties of Human object
+
+method getFullName is defined on the prototype property of the Human function. Each object created using the Human constructor function will have their own copy of firstName and lastName, i.e. person1 will have firstName value as Virat while person2 will have firstName value as Rohit.
+
+The getFullName function will be shared among all the objects created using the constructor function, i.e. both person1 and person2 will have the same copy of getFullname. If person1 changes getFullName, person2 will also have this modified getFullName. This is because prototype properties of the constructor function are shared among all the objects.
+
+Prototypes in JavaScript
+
+We could have also defined getFullName inside the Human constructor function and it would have been perfectly fine. But then, person1 and person2 would have different copies of the getFullname function which would be redundant. Unnecessarily, this would have consumed extra memory. Hence, getFullName function is defined on the Human prototype so that all the objects created using Human constructor function have the same copy of getFullName function.
+
+This is just the basics of prototypes for decorators. If you want to understand this important and wonderful concept of prototypes, you can read this article
+
+Class Keyword
+Classes in JavaScript, introduced in ES2015, are not like classes in Java, C# or Python. It’s just syntactical sugar over the prototype-based behavior. Syntactical sugar means JavaScript lets you define classes using the class keyword but, under the hood, it still uses prototypes and constructor functions as discussed above to create objects.
+
+Class Declaration
+class Human {
+	constructor(firstName, lastName) {
+		this.firstName = firstName
+		this.lastName = lastName
+	}
+	
+	getFullName() {
+		return this.firstName + " " + this.lastName
+	}
+}
+
+typeof(Human) // function
+JavaScript
+The above code declares a class Human with a constructor function. Under the hood, JavaScript will convert this class into a Human constructor function. All the functions defined inside the class will be attached to the prototype property of the constructor function.
+
+The below code displays the conversion of classes to constructors and prototypes:
+
+function Human(firstName, lastName) {
+	this.firstName = firstName
+	this.lastName = lastName
+}
+
+Human.prototype.getFullName = function() {
+	return this.firstName + " " + this.lastName
+}
+JavaScript
+This is similar to the constructor function we discussed above. This is why classes are called syntactical sugars in JavaScript.
+
+Human constructor function
+
+In the above image, we can see that the type of Human is a function. Also, if we compare the Human.prototype of both class Human and constructor function Human, they are the same except that the constructor property of class Human has a constructor property with value class Human, while in the case of constructor function it is ƒ Human(firstName, lastName) as show below:
+
+Constructor function and class comparison
+
+We can create objects using the class with new keyword as shown below.
+
+humanObj = new Human("Virat", "Kohli")
+console.log(humanObj)
+JavaScript
+Let’s now understand why higher-order functions do not work with class methods.
+
+Issues Using Higher-Order Functions with Class Methods
+// This is a decorator function which accepts a function as a parameter
+function log(functionAsParameter) {
+	return function() {
+		console.log("Execution of " + functionAsParameter.name + " begin")
+		// Decorator function calls the passed parameter inside its definition
+		functionAsParameter()
+		console.log("Execution of " + functionAsParameter.name + " end")
+	}	
+}
+
+class Human {
+	constructor(firstName, lastName) {
+		this.firstName = firstName
+		this.lastName = lastName
+	}
+	
+	getFullName() {
+		return this.firstName + " " + this.lastName
+	}
+}
+
+var humanObj = new Human("Virat", "Kohli")
+
+// Passing the class method getFullName to the log higher order function
+var newGetFullNameFunc = log(humanObj.getFullName)
+newGetFullNameFunc()
+JavaScript
+Error in using higer-order fucntion with methods
+
+The above code declares a log function as a higher-order function which takes another function as a parameter. log function is used for logging. We have created an object humanObj. Let’s try to use the log function with getFullName function. The newGetFullNameFunc function is a modified getFullName function capable of logging. Definition of newGetFullNameFunc:
+
+var newGetFullNameFunc = function() {
+	console.log("Execution of " + functionAsParameter.name + " begin")
+	functionAsParameter()
+	console.log("Execution of " + functionAsParameter.name + " end")
+} 
+JavaScript
+When newGetFullNameFunc is called, internally it calls functionAsParameter, i.e. the getFullName function. When the getFullName function is called from newGetFullNameFunc, the value of this inside getFullName is undefined. Hence the code breaks. To correct this, we can modify our log function as shown below:
+
+function log(classObj, functionAsParameter) {
+	return function() {
+		console.log("Execution of " + functionAsParameter.name + " begin")
+		functionAsParameter.call(classObj)
+		console.log("Execution of " + functionAsParameter.name + " end")
+	}	
+}
+
+class Human2 {
+	constructor(firstName, lastName) {
+		this.firstName = firstName
+		this.lastName = lastName
+	}
+	
+	getFullName() {
+		return this.firstName + " " + this.lastName
+	}
+}
+
+var humanObj = new Human2("Virat", "Kohli")
+var newGetFullNameFunc = log(humanObj, humanObj.getFullName)
+newGetFullNameFunc()
+JavaScript
+In the above code, we are also passing the humanObj object as a parameter to the log function. This is done to preserve the value of this. Inside newGetFullNameFunc we call functionAsParameter (i.e. getFullName function) with the help of the call function. The call function will call the getFullName on the humanObj object, i.e. now the value of this inside the getFullName function will be humanObj which has firstName and lastName as properties. Hence, this code works perfectly fine.
+
+To make the decorator’s syntax more familiar to developers, a new decorator syntax was proposed that is similar to the syntax of decorator in other languages. We will have a look at this syntax, but first, let’s discuss property descriptors which will help us in understanding decorators.
+
+Property Descriptors
+Each object property in JavaScript has property descriptors that are used to describe the attributes or the metadata of the property. Property descriptors are themselves an object. Following are the property descriptors associated with each property of an object:
+
+value: Current value of the property of the object.
+writable: true or false. Default value is true. Indicates if the property is writable or not.
+enumerable: true or false. Default value is true. Indicates if the property is enumerable or not, i.e. if it will appear in the iteration of object.keys.
+configurable: true or false. Default value is true. Indicates if the property descriptors of the property can be modified or not.
+Consider an object as shown below:
+
+var humanObj = {
+	'firstName': 'Virat',
+	'lastName': 'Kohli',
+	'getFullName': function() {
+		return this.firstName + " " + this.lastName;
+	}
+}
+JavaScript
+Here, we have a humanObj object. Each property (firstName, lastName and getFullName) will have its own property descriptors. We can check the value of the property descriptor with the help of getOwnPropertyDescriptor as shown below:
+
+Object.getOwnPropertyDescriptor(humanObj, 'firstName')
+/* 
+Output:
+{
+	value: "Virat", 
+	writable: true, 
+	enumerable: true, 
+	configurable: true
+} 
+*/
+JavaScript
+getOwnPropertyDescriptor lists all the property descriptors of firstName. Similarly, lastName and getFullName will have their own property descriptors.
+
+object.defineProperty
+object.defineProperty can be used to define new properties or update an existing property of an object. object.defineProperty takes the following parameters:
+
+object: Object on which new property needs to be created or existing property needs to be updated.
+name: Name of the property.
+descriptor: Property descriptor object.
+Let’s define a new property with age on humanObj.
+
+Object.defineProperty(humanObj, 'age', {value: 10});
+Object.getOwnPropertyDescriptor(humanObj, 'age')
+/* 
+Output:
+{
+	value: 10, 
+	writable: true, 
+	enumerable: true, 
+	configurable: true
+} 
+*/
+JavaScript
+For the age property, as we have provided only a value property descriptor as a parameter to defineProperty, other property descriptors will have the default values. If the property already exists on the object, Object.defineProperty will overwrite the property with the new property descriptors as shown below.
+
+Object.defineProperty(humanObj, 'firstName', {value: "Rohit"});
+console.log(humanObj)
+/*
+Output
+	{firstName: "Rohit", lastName: "Kohli"}
+*/
+JavaScript
+To prevent the user from changing the value of any object property, we can make it readable-only by changing writable to false.
+
+Object.defineProperty(humanObj, 'firstName', {writable: false});
+JavaScript
+Now, if we try to change the property, it will not change.
+
+humanObj.firstName = 'Virat'
+console.log(humanObj)
+/*
+Output
+	{firstName: "Rohit", lastName: "Kohli"}
+*/
+JavaScript
+If we do not want users to change property descriptors, we can prevent them by setting the configurable property descriptor to false.
+
+Now, with the understanding of all the above concepts, finally, let’s understand decorators.
+
+Note: As decorators are not currently part of JavaScript, the below code snippets cannot be executed in the browser. You can use JSFiddle to execute and understand the below code snippets. In JSFiddle, you have to select the language as Babel + JSX as shown below:
+
+JSFiddle
+
+Class Method Decorator
+Class method decorators are used to modify the class methods by adding extra functionalities on top of the method. It behaves like higher-order functions. Decorators are added above the method definition using @ followed by the name of the decorator function. Here is the syntax for the decorator:
+
+// Decorator function
+function decoratorFunc(target, property, descriptor) {}
+
+class DecoEx {
+    // Syntax for adding decorator
+    @decoratorFunc
+    getFullName() {}
+}
+JavaScript
+A decorator function accepts three parameters as shown above:
+
+target: Class of the method on which the decorator is defined.
+property: Name of the method on which the decorator is defined.
+descriptor: Property descriptors of the method on which the decorator has been defined.
+The decorator returns the property descriptor object. We can use property descriptor’s value property to overwrite the definition of the underlying function. When the JavaScript engine encounters the decorator, it calls the decorator function by passing the underlying function as a parameter. Inside the decorator function, we define a new function on top of the underlying function along with some new lines of code.
+
+Let’s understand this with an example. Consider the code below:
+
+// This is the decorator function
+function readonlyDecorator(target, property, descriptor) {
+    console.log("Target: " )
+    console.log(target)
+    
+    console.log("\nProperty name")
+    console.log(property)
+    
+    console.log("\nDescriptor property")
+    console.log(descriptor)
+    
+    // This will make property readonly
+    descriptor.writable = false
+    // This descriptor will overwrite getFullName method descriptor
+    return descriptor
+}
+
+class Human {
+	constructor(firstName, lastName) {
+		this.firstName = firstName
+		this.lastName = lastName
+	}
+	
+	// Syntax for the decorator
+	@readonlyDecorator
+	getFullName() {
+		return this.firstName + " " + this.lastName
+	}
+}
+
+humanObj = new Human("Virat", "Kohli")
+
+console.log("\ngetFullName property value")
+console.log(humanObj.getFullName)
+
+// Let's try to modify getFullName property value
+humanObj.getFullName = "Hello"
+
+// As its read only it will still have the old value not "Hello"
+console.log("\nAfter changing getFullName value")
+console.log(humanObj.getFullName)
+JavaScript
+Find the JSFiddle code here.
+
+readonly decorator example
+
+We want the getFullName method to be read-only. Hence, we have defined the @readonlyDecorator decorator on top of the getFullName method. @readonlyDecorator takes Human.prototype, getFullName method name i.e. getFullName and property descriptor of getFullName as parameters.
+
+Here, the JavaScript engine will first call the readonlyDecorator and then getFullName function. When readonlyDecorator is called it modifies the getFullName function using the property descriptor’s value property, so when JavaScript calls the getFullName function, it is calling the modified getFullName function. Let’s check the steps taken by the JavaScript engine to execute the decorators.
+
+// Get the property descriptor of the `getFullName` functionfuncDescriptor = Object.getOwnPropertyDescriptor(humanObj, 'getFullName')
+
+// Calls readonlyDecorator and passes funcDescriptor as a parameter. readonlyDecorator modifies the `getFullName` and returns the descriptor with the modified `getFullName` definition
+descriptor = readonlyDecorator(Human.prototype, 'getFullName', funcDescriptor)
+
+// JavaScript overwrites the `getFullName` descriptor with the new descriptor returned 
+// by the readonlyDecorator
+Object.defineProperty(Human.prototype, 'getFullName', descriptor);
+JavaScript
+You can comment the @readonlyDecorator code from the top of getFullName method and then try to modify the getFullName method.
+
+Now, we will see how to define decorators with parameters. Consider the example below:
+
+function log(message) {
+  function actualLogDecorator(target, property, descriptor) {
+    console.log("\ngetFullName descriptor's value property")
+    console.log(descriptor.value)
+
+    var actualFunction = descriptor.value;
+
+    var decoratorFunc = function() {
+      console.log(message)
+      // Call the getFullName function on the humanObj object
+      return actualFunction.call(this)
+    }
+
+    // Here, we are overwriting the getFullName with the decoratorFunc which has log
+    // functionality and also actualFunction i.e. getFullName function
+    descriptor.value = decoratorFunc
+
+		console.log("\nNew descriptor's value property due to decorator")
+    console.log(descriptor.value)
+
+    // This descriptor will overwrite the getFullName descriptor's value property
+    return descriptor
+  }
+
+  return actualLogDecorator
+}
+
+class Human {
+  constructor(firstName, lastName) {
+    this.firstName = firstName
+    this.lastName = lastName
+  }
+
+  @log("Logging by decorator")
+  getFullName() {
+    return this.firstName + " " + this.lastName
+  }
+}
+
+humanObj = new Human("Virat", "Kohli")
+
+console.log("\ngetFullName's descriptor's value property after modification due to decorator")
+
+// Human.prototype is used because class methods are defined on the prototype property
+descriptorObject = Object.getOwnPropertyDescriptor(Human.prototype, 'getFullName')
+console.log(descriptorObject.value)
+
+console.log("\nOutput for getFullName method")
+console.log(humanObj.getFullName())
+JavaScript
+Find JSFiddle code here.
+
+Example of decorator with parameters
+
+Steps followed by JavaScript:
+
+var funcDescriptor = Object.getOwnPropertyDescriptor(humanObj, 'getFullName')
+
+// JS calls the decorators functions. log function returns the actualLogDecorator which is assigned to actualDecorator. Thus actualDecorator is a function with log functionalities on the top of the getFullName function
+var actualDecorator = log("This is done using decorators") // This returns a function
+
+descriptor = actualDecorator(Human.prototype, 'getFullName', funcDescriptor)
+Object.defineProperty(Human.prototype, 'getFullName', descriptor);
+JavaScript
+Here, JavaScript first calls the log method with the parameter. log method returns the actualLogDecorator function. actualLogDecorator is a modified getFullName method with logging functionality added on top of the getFullName function.
+
+JavaScript treats the actualLogDecorator as the decorator function, so actualLogDecorator returns the descriptor which has the modified getFullName function definition.
+
+After this, the steps followed by JavaScript to execute the getFullName with the decorator function are same as discussed in the example of a decorator without a parameter.
+
+Class Decorators
+Class decorators are defined at the top of the class, unlike method decorators which are declared at the top of the class method. Class decorators need to return the constructor function or a new class, unlike method decorators which need to return the property descriptor. Class decorators accept only one parameter — that is the class on which they are defined. Let’s have a look at the class decorators example.
+
+@decFunc
+class Foo {
+}
+
+// ES2015 implementation
+// Equivalent of class Foo
+function Foo(FooClass) {
+}
+
+// Now apply the decorator. If the decorator returns undefined then NewFoo will be Foo
+NewFoo = decFunc(Foo) || Foo
+
+// After getting the NewFoo, overwrite the existing Foo to have NewFoo value
+Foo = NewFoo
+JavaScript
+The above code explains the steps involved in the class decorator execution. We have an empty class Foo with decorator function decFunc defined on top of the class Foo. decorFunc accepts the class (or the constructor function in ES2015) as a parameter, modifies it and then returns the modified class (or the constructor function in ES2015) which is assigned to NewFoo variable. The NewFoo variable overwrites the Foo so that now Foo has the modified functionality, i.e. NewFoo functionality. Let’s consider another example:
+
+function  newConstructor( HumanClass ) {
+	// newConstructorFunc will modify or overwrite the HumanClass constructor function
+	var  newConstructorFunc  =  function(firstName, lastName, age) {
+		this.firstName  =  firstName
+		this.lastName  =  lastName
+		this.age  =  age
+	}
+
+	return  newConstructorFunc
+} 
+
+@newConstructor
+class  Human {
+	constructor( firstName, lastName ) {
+		this.firstName  =  firstName;
+		this.lastName  =  lastName;
+	}
+}
+
+// Though Human class constructor function takes only two parameters, but due to 
+// newConstructor now Human class can accept 3 parameters
+var  person1  =  new  Human("Virat", "Kohli", 31);
+console.log( person1 );
+
+// Displays the modified constructor function
+console.log( Human.prototype.constructor );
+console.log(person1.__proto__.constructor);
+JavaScript
+Find JSFiddle code here.
+
+Here, the newConstructor decorator is defined on the Human class. The newConstructor decorator returns a constructor function with firstName, lastName and age parameters. The returned constructor function overwrites the existing Human constructor function. Due to this, we are able to pass the Virat, Kohli and 31 parameters to the Human constructor function.
+
+Instead of the constructor function, we could have also returned the new class itself as shown below. This NewClass definition will overwrite the Human class constructor function definition.
+
+function newConstructor(HumanClass) {
+	return class NewClass {
+		constructor(firstName, lastName, age) {
+			this.firstName = firstName
+			this.lastName = lastName
+			this.age = age
+		}
+	}
+}
+JavaScript
+Conclusion
+In this article, we learned the following concepts related to decorators:
+
+Implementation of decorators in JavaScript using higher-order functions
+Basic of classes in JavaScript
+Property descriptors in javaScript
+Class method decorators and Class decorators in JavaScript
